@@ -153,3 +153,82 @@ async def get_delivery_points(
     store_repo = StoreRepositoryImpl(db)
     points = await store_repo.get_delivery_points(store_id)
     return [DeliveryPointResponse.model_validate(p) for p in points]
+
+
+@router.put("/{store_id}", response_model=StoreResponse)
+async def update_store(
+    store_id: int,
+    request: StoreRequest,
+    current_user = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Update store (Seller only).
+    
+    Only the store owner can update it.
+    """
+    store_repo = StoreRepositoryImpl(db)
+    store = await store_repo.get_by_id(store_id)
+    
+    if not store:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Store {store_id} not found"
+        )
+    
+    if store.seller_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only update your own stores"
+        )
+    
+    # Check if new slug already exists (if it's different)
+    if request.slug != store.slug:
+        existing = await store_repo.get_by_slug(request.slug)
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Store with slug '{request.slug}' already exists"
+            )
+    
+    # Update fields
+    store.name = request.name
+    store.slug = request.slug
+    store.description = request.description
+    store.address = request.address
+    store.lat = request.lat
+    store.lng = request.lng
+    
+    updated = await store_repo.update(store)
+    return StoreResponse.model_validate(updated)
+
+
+@router.delete("/{store_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_store(
+    store_id: int,
+    current_user = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Delete store (Seller only).
+    
+    Only the store owner can delete it.
+    """
+    store_repo = StoreRepositoryImpl(db)
+    store = await store_repo.get_by_id(store_id)
+    
+    if not store:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Store {store_id} not found"
+        )
+    
+    if store.seller_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only delete your own stores"
+        )
+    
+    await store_repo.delete(store_id)
+    return None
+
