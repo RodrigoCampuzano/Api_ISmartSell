@@ -72,7 +72,10 @@ app = FastAPI(
     """,
     lifespan=lifespan,
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
+    swagger_ui_parameters={
+        "persistAuthorization": True,
+    }
 )
 
 # Configure CORS
