@@ -64,10 +64,20 @@ async def get_current_user_id(
 ) -> int:
     """Extract user ID from JWT token."""
     token = credentials.credentials
-    payload = decode_access_token(token)
+    print(f"DEBUG: Received token: {token[:50]}...")  # Print first 50 chars
+    
+    try:
+        payload = decode_access_token(token)
+        print(f"DEBUG: Decoded payload: {payload}")
+    except Exception as e:
+        print(f"DEBUG: Error decoding token: {e}")
+        raise
+    
     user_id = payload.get("sub")
+    print(f"DEBUG: Extracted user_id: {user_id} (type: {type(user_id)})")
     
     if user_id is None:
+        print("DEBUG: user_id is None!")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
@@ -76,8 +86,11 @@ async def get_current_user_id(
     
     # Convert to int if it's a string
     try:
-        return int(user_id)
-    except (ValueError, TypeError):
+        user_id_int = int(user_id)
+        print(f"DEBUG: Converted user_id to int: {user_id_int}")
+        return user_id_int
+    except (ValueError, TypeError) as e:
+        print(f"DEBUG: Error converting user_id to int: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token payload",
