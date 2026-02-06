@@ -65,7 +65,7 @@ async def get_current_user_id(
     """Extract user ID from JWT token."""
     token = credentials.credentials
     payload = decode_access_token(token)
-    user_id: int = payload.get("sub")
+    user_id = payload.get("sub")
     
     if user_id is None:
         raise HTTPException(
@@ -74,7 +74,15 @@ async def get_current_user_id(
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    return user_id
+    # Convert to int if it's a string
+    try:
+        return int(user_id)
+    except (ValueError, TypeError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token payload",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 
 async def get_current_user(
