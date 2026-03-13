@@ -13,13 +13,13 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 
-	"github.com/pos-app/api/internal/application/services"
-	infraHTTP "github.com/pos-app/api/internal/infrastructure/http"
-	"github.com/pos-app/api/internal/infrastructure/http/handler"
-	"github.com/pos-app/api/internal/infrastructure/persistence/mysql"
-	"github.com/pos-app/api/pkg/config"
-	"github.com/pos-app/api/pkg/jwt"
-	"github.com/pos-app/api/pkg/qr"
+	"github.com/RodrigoCampuzano/Api_ISmartSell/internal/application/services"
+	infraHTTP "github.com/RodrigoCampuzano/Api_ISmartSell/internal/infrastructure/http"
+	"github.com/RodrigoCampuzano/Api_ISmartSell/internal/infrastructure/http/handler"
+	"github.com/RodrigoCampuzano/Api_ISmartSell/internal/infrastructure/persistence/mysql"
+	"github.com/RodrigoCampuzano/Api_ISmartSell/pkg/config"
+	"github.com/RodrigoCampuzano/Api_ISmartSell/pkg/jwt"
+	"github.com/RodrigoCampuzano/Api_ISmartSell/pkg/qr"
 )
 
 func main() {
