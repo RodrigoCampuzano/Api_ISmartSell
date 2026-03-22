@@ -1,4 +1,4 @@
-package mysql
+package postgres
 
 import (
 	"context"
@@ -45,7 +45,7 @@ func (r *orderRepository) Update(ctx context.Context, o *order.Order) error {
 
 func (r *orderRepository) FindByID(ctx context.Context, id string) (*order.Order, error) {
 	var o order.Order
-	err := r.db.GetContext(ctx, &o, `SELECT * FROM orders WHERE id = ?`, id)
+	err := r.db.GetContext(ctx, &o, `SELECT * FROM orders WHERE id = $1`, id)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, order.ErrNotFound
 	}
@@ -54,7 +54,7 @@ func (r *orderRepository) FindByID(ctx context.Context, id string) (*order.Order
 	}
 
 	var items []order.Item
-	if err := r.db.SelectContext(ctx, &items, `SELECT * FROM order_items WHERE order_id = ?`, id); err != nil {
+	if err := r.db.SelectContext(ctx, &items, `SELECT * FROM order_items WHERE order_id = $1`, id); err != nil {
 		return nil, err
 	}
 	o.Items = items
@@ -64,20 +64,20 @@ func (r *orderRepository) FindByID(ctx context.Context, id string) (*order.Order
 func (r *orderRepository) FindByBuyer(ctx context.Context, buyerID string) ([]*order.Order, error) {
 	var list []*order.Order
 	err := r.db.SelectContext(ctx, &list,
-		`SELECT * FROM orders WHERE buyer_id = ? ORDER BY created_at DESC`, buyerID)
+		`SELECT * FROM orders WHERE buyer_id = $1 ORDER BY created_at DESC`, buyerID)
 	return list, err
 }
 
 func (r *orderRepository) FindByBusiness(ctx context.Context, businessID string) ([]*order.Order, error) {
 	var list []*order.Order
 	err := r.db.SelectContext(ctx, &list,
-		`SELECT * FROM orders WHERE business_id = ? ORDER BY created_at DESC`, businessID)
+		`SELECT * FROM orders WHERE business_id = $1 ORDER BY created_at DESC`, businessID)
 	return list, err
 }
 
 func (r *orderRepository) FindByQRCode(ctx context.Context, qrCode string) (*order.Order, error) {
 	var o order.Order
-	err := r.db.GetContext(ctx, &o, `SELECT * FROM orders WHERE qr_code = ?`, qrCode)
+	err := r.db.GetContext(ctx, &o, `SELECT * FROM orders WHERE qr_code = $1`, qrCode)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, order.ErrNotFound
 	}

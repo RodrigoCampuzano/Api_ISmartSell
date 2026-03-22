@@ -1,4 +1,4 @@
-package mysql
+package postgres
 
 import (
 	"context"
@@ -31,7 +31,7 @@ func (r *userRepository) Save(ctx context.Context, u *user.User) error {
 
 func (r *userRepository) FindByID(ctx context.Context, id string) (*user.User, error) {
 	var u user.User
-	err := r.db.GetContext(ctx, &u, `SELECT * FROM users WHERE id = ? AND active = TRUE`, id)
+	err := r.db.GetContext(ctx, &u, `SELECT * FROM users WHERE id = $1 AND active = TRUE`, id)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, user.ErrNotFound
 	}
@@ -43,7 +43,7 @@ func (r *userRepository) FindByID(ctx context.Context, id string) (*user.User, e
 
 func (r *userRepository) FindByEmail(ctx context.Context, email string) (*user.User, error) {
 	var u user.User
-	err := r.db.GetContext(ctx, &u, `SELECT * FROM users WHERE email = ? AND active = TRUE`, email)
+	err := r.db.GetContext(ctx, &u, `SELECT * FROM users WHERE email = $1 AND active = TRUE`, email)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, user.ErrNotFound
 	}
@@ -55,6 +55,6 @@ func (r *userRepository) FindByEmail(ctx context.Context, email string) (*user.U
 
 func (r *userRepository) ExistsByEmail(ctx context.Context, email string) (bool, error) {
 	var count int
-	err := r.db.GetContext(ctx, &count, `SELECT COUNT(*) FROM users WHERE email = ?`, email)
+	err := r.db.GetContext(ctx, &count, `SELECT COUNT(*) FROM users WHERE email = $1`, email)
 	return count > 0, err
 }

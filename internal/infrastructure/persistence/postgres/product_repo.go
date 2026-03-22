@@ -1,4 +1,4 @@
-package mysql
+package postgres
 
 import (
 	"context"
@@ -34,13 +34,13 @@ func (r *productRepository) Update(ctx context.Context, p *product.Product) erro
 }
 
 func (r *productRepository) Delete(ctx context.Context, id string) error {
-	_, err := r.db.ExecContext(ctx, `UPDATE products SET active = FALSE WHERE id = ?`, id)
+	_, err := r.db.ExecContext(ctx, `UPDATE products SET active = FALSE WHERE id = $1`, id)
 	return err
 }
 
 func (r *productRepository) FindByID(ctx context.Context, id string) (*product.Product, error) {
 	var p product.Product
-	err := r.db.GetContext(ctx, &p, `SELECT * FROM products WHERE id = ? AND active = TRUE`, id)
+	err := r.db.GetContext(ctx, &p, `SELECT * FROM products WHERE id = $1 AND active = TRUE`, id)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, product.ErrNotFound
 	}
@@ -53,14 +53,14 @@ func (r *productRepository) FindByID(ctx context.Context, id string) (*product.P
 func (r *productRepository) FindByBusiness(ctx context.Context, businessID string) ([]*product.Product, error) {
 	var list []*product.Product
 	err := r.db.SelectContext(ctx, &list,
-		`SELECT * FROM products WHERE business_id = ? AND active = TRUE ORDER BY name`, businessID)
+		`SELECT * FROM products WHERE business_id = $1 AND active = TRUE ORDER BY name`, businessID)
 	return list, err
 }
 
 // DecreaseStock decrementa el stock de forma atómica con UPDATE condicional.
 func (r *productRepository) DecreaseStock(ctx context.Context, productID string, qty int) error {
 	res, err := r.db.ExecContext(ctx,
-		`UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?`, qty, productID, qty)
+		`UPDATE products SET stock = stock - $1 WHERE id = $2 AND stock >= $1`, qty, productID)
 	if err != nil {
 		return fmt.Errorf("productRepo.DecreaseStock: %w", err)
 	}

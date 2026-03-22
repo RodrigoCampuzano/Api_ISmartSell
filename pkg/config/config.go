@@ -16,7 +16,7 @@ type Config struct {
 func Load() Config {
 	return Config{
 		Port:      getEnv("PORT", "8080"),
-		DSN:       getEnv("DSN", "root:root@tcp(localhost:3306)/pos_app?parseTime=true&charset=utf8mb4"),
+		DSN:       getEnv("DSN", "postgres://postgres:postgres@localhost:5432/pos_app?sslmode=disable"),
 		JWTSecret: getEnv("JWT_SECRET", "change-me-in-production"),
 		JWTTTLHrs: getEnvInt("JWT_TTL_HOURS", 72),
 	}

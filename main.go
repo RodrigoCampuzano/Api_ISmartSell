@@ -10,13 +10,13 @@ import (
 	"syscall"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 	"github.com/jmoiron/sqlx"
 
 	"github.com/RodrigoCampuzano/Api_ISmartSell/internal/application/services"
 	infraHTTP "github.com/RodrigoCampuzano/Api_ISmartSell/internal/infrastructure/http"
 	"github.com/RodrigoCampuzano/Api_ISmartSell/internal/infrastructure/http/handler"
-	"github.com/RodrigoCampuzano/Api_ISmartSell/internal/infrastructure/persistence/mysql"
+	"github.com/RodrigoCampuzano/Api_ISmartSell/internal/infrastructure/persistence/postgres"
 	"github.com/RodrigoCampuzano/Api_ISmartSell/pkg/config"
 	"github.com/RodrigoCampuzano/Api_ISmartSell/pkg/jwt"
 	"github.com/RodrigoCampuzano/Api_ISmartSell/pkg/qr"
@@ -26,7 +26,7 @@ func main() {
 	cfg := config.Load()
 
 	// ── Base de datos ───────────────────────────────────────
-	db, err := sqlx.Connect("mysql", cfg.DSN)
+	db, err := sqlx.Connect("postgres", cfg.DSN)
 	if err != nil {
 		log.Fatalf("db connect: %v", err)
 	}
@@ -40,10 +40,10 @@ func main() {
 	qrSvc := qr.NewService()
 
 	// ── Repositorios (adaptadores de salida) ────────────────
-	userRepo     := mysql.NewUserRepository(db)
-	businessRepo := mysql.NewBusinessRepository(db)
-	productRepo  := mysql.NewProductRepository(db)
-	orderRepo    := mysql.NewOrderRepository(db)
+	userRepo     := postgres.NewUserRepository(db)
+	businessRepo := postgres.NewBusinessRepository(db)
+	productRepo  := postgres.NewProductRepository(db)
+	orderRepo    := postgres.NewOrderRepository(db)
 
 	// ── Servicios de aplicación (casos de uso) ──────────────
 	userSvc     := services.NewUserService(userRepo, jwtSvc)
