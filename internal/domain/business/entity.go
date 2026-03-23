@@ -11,18 +11,19 @@ var (
 )
 
 type Business struct {
-	ID          string         `db:"id"`
-	OwnerID     string         `db:"owner_id"`
-	Name        string         `db:"name"`
-	Description string         `db:"description"`
-	Type        string         `db:"type"`
-	Latitude    float64        `db:"latitude"`
-	Longitude   float64        `db:"longitude"`
-	Active      bool           `db:"active"`
-	CreatedAt   time.Time      `db:"created_at"`
-	UpdatedAt   time.Time      `db:"updated_at"`
+	ID          string         `db:"id"         json:"id"`
+	OwnerID     string         `db:"owner_id"   json:"owner_id"`
+	Name        string         `db:"name"       json:"name"`
+	Description string         `db:"description" json:"description"`
+	Type        string         `db:"type"       json:"type"`
+	Latitude    float64        `db:"latitude"   json:"latitude"`
+	Longitude   float64        `db:"longitude"  json:"longitude"`
+	Active      bool           `db:"active"     json:"active"`
+	CreatedAt   time.Time      `db:"created_at" json:"created_at"`
+	UpdatedAt   time.Time      `db:"updated_at" json:"updated_at"`
+	Distance    float64        `db:"distance"   json:"distance,omitempty"` // metros, solo en FindNearby
 
-	DeliveryPoints []DeliveryPoint `db:"-"`
+	DeliveryPoints []DeliveryPoint `db:"-" json:"delivery_points,omitempty"`
 }
 
 type DeliveryPoint struct {
