@@ -26,7 +26,7 @@ type CreateOrderInput struct {
 	Type            string // "online" | "reserved"
 	Items           []OrderItemInput
 	DeliveryPointID *string
-	ReservationHours int // horas límite para recoger (reserved)
+	ReservationMinutes int // minutos límite para recoger (reserved, max 30)
 }
 
 // ----- Puerto de entrada -----
@@ -93,11 +93,11 @@ func (s *orderService) CreateOrder(ctx context.Context, in CreateOrderInput) (*o
 	// Deadline para apartados
 	var deadline *time.Time
 	if in.Type == string(order.TypeReserved) {
-		h := in.ReservationHours
-		if h == 0 {
-			h = 24
+		m := in.ReservationMinutes
+		if m <= 0 || m > 30 {
+			m = 30
 		}
-		t := time.Now().Add(time.Duration(h) * time.Hour)
+		t := time.Now().Add(time.Duration(m) * time.Minute)
 		deadline = &t
 	}
 

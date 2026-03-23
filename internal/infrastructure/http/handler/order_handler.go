@@ -27,7 +27,7 @@ func (h *OrderHandler) Create(w http.ResponseWriter, r *http.Request) {
 		BusinessID      string `json:"business_id"`
 		Type            string `json:"type"` // "online" | "reserved"
 		DeliveryPointID *string `json:"delivery_point_id,omitempty"`
-		ReservationHours int    `json:"reservation_hours,omitempty"`
+		ReservationMinutes int  `json:"reservation_minutes,omitempty"`
 		Items []struct {
 			ProductID string `json:"product_id"`
 			Quantity  int    `json:"quantity"`
@@ -49,8 +49,8 @@ func (h *OrderHandler) Create(w http.ResponseWriter, r *http.Request) {
 		BusinessID:       body.BusinessID,
 		Type:             body.Type,
 		Items:            items,
-		DeliveryPointID:  body.DeliveryPointID,
-		ReservationHours: body.ReservationHours,
+		DeliveryPointID:    body.DeliveryPointID,
+		ReservationMinutes: body.ReservationMinutes,
 	})
 	if err != nil {
 		response.Error(w, http.StatusBadRequest, err.Error())
