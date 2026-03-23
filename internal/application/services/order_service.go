@@ -93,11 +93,8 @@ func (s *orderService) CreateOrder(ctx context.Context, in CreateOrderInput) (*o
 	// Deadline para apartados
 	var deadline *time.Time
 	if in.Type == string(order.TypeReserved) {
-		h := in.ReservationHours
-		if h == 0 {
-			h = 24
-		}
-		t := time.Now().Add(time.Duration(h) * time.Hour)
+		// Se fuerza a 30 minutos para no alterar el contrato DTO de ReservationHours
+		t := time.Now().Add(30 * time.Minute)
 		deadline = &t
 	}
 
