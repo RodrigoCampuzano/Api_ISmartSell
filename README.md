@@ -427,7 +427,7 @@ Crea un pedido. Verifica stock y lo decrementa atómicamente.
   "business_id": "uuid",
   "type": "online",
   "delivery_point_id": "uuid",
-  "reservation_minutes": 30,
+  "reservation_hours": 24,
   "items": [
     { "product_id": "uuid", "quantity": 2 },
     { "product_id": "uuid", "quantity": 1 }
@@ -435,9 +435,9 @@ Crea un pedido. Verifica stock y lo decrementa atómicamente.
 }
 ```
 
-> - `type`: `"online"` (genera QR inmediato, status=`paid`) o `"reserved"` (status=`reserved`, expira en `reservation_minutes` minutos, máximo y por defecto 30)
+> - `type`: `"online"` (genera QR inmediato, status=`paid`) o `"reserved"` (status=`reserved`, expira en `reservation_hours` horas, default 24)
 > - `delivery_point_id`: Opcional, punto de entrega
-> - `reservation_minutes`: Solo aplica para `type: "reserved"`
+> - `reservation_hours`: Solo aplica para `type: "reserved"`
 
 **Response (`201`):**
 ```json
