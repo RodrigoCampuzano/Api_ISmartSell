@@ -59,6 +59,7 @@ func NewRouter(h Handlers, jwtSvc *jwt.Service) http.Handler {
 
 				// Órdenes del negocio
 				r.Get("/businesses/{businessId}/orders", h.Order.ListByBusiness)
+				r.Post("/orders/{id}/ready", h.Order.Ready)
 				r.Post("/orders/scan", h.Order.ScanQR)
 			})
 

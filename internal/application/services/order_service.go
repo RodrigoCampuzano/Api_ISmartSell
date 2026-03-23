@@ -36,6 +36,7 @@ type OrderService interface {
 	GetByID(ctx context.Context, id, userID string) (*order.Order, error)
 	GetByBuyer(ctx context.Context, buyerID string) ([]*order.Order, error)
 	GetByBusiness(ctx context.Context, businessID, sellerID string) ([]*order.Order, error)
+	MarkReady(ctx context.Context, id, sellerID string) (*order.Order, error)
 	// ScanQR lo llama el vendedor para confirmar entrega.
 	ScanQR(ctx context.Context, qrCode, sellerID string) (*order.Order, error)
 	CancelOrder(ctx context.Context, id, userID string) (*order.Order, error)
@@ -102,6 +103,9 @@ func (s *orderService) CreateOrder(ctx context.Context, in CreateOrderInput) (*o
 
 	o := order.New(uuid.NewString(), in.BuyerID, in.BusinessID,
 		order.Type(in.Type), items, in.DeliveryPointID, deadline)
+	
+	// Generar el código QR de manera incondicional, tal como lo requiere la app.
+	o.QRCode = uuid.NewString()
 
 	// Disminuir stock de forma atómica
 	for _, it := range items {
@@ -110,13 +114,9 @@ func (s *orderService) CreateOrder(ctx context.Context, in CreateOrderInput) (*o
 		}
 	}
 
-	// Para compras en línea: generar QR inmediatamente
+	// Para compras en línea: el estatus arranca como pagado
 	if o.Type == order.TypeOnline {
-		code, err := s.qrSvc.Generate(o.ID)
-		if err != nil {
-			return nil, fmt.Errorf("orderService.CreateOrder qr: %w", err)
-		}
-		_ = o.MarkPaid(code)
+		_ = o.MarkPaid(o.QRCode)
 	}
 
 	if err := s.orderRepo.Save(ctx, o); err != nil {
@@ -162,6 +162,27 @@ func (s *orderService) GetByBusiness(ctx context.Context, businessID, sellerID s
 		return nil, order.ErrUnauthorized
 	}
 	return s.orderRepo.FindByBusiness(ctx, businessID)
+}
+
+func (s *orderService) MarkReady(ctx context.Context, id, sellerID string) (*order.Order, error) {
+	o, err := s.orderRepo.FindByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	b, err := s.businessRepo.FindByID(ctx, o.BusinessID)
+	if err != nil {
+		return nil, err
+	}
+	if !b.OwnedBy(sellerID) {
+		return nil, order.ErrUnauthorized
+	}
+	if err := o.MarkReady(); err != nil {
+		return nil, err
+	}
+	if err := s.orderRepo.Update(ctx, o); err != nil {
+		return nil, fmt.Errorf("orderService.MarkReady update: %w", err)
+	}
+	return o, nil
 }
 
 func (s *orderService) ScanQR(ctx context.Context, qrCode, sellerID string) (*order.Order, error) {

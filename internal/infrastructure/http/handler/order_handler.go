@@ -105,6 +105,24 @@ func (h *OrderHandler) ListByBusiness(w http.ResponseWriter, r *http.Request) {
 	response.JSON(w, http.StatusOK, list)
 }
 
+// POST /api/v1/orders/:id/ready
+func (h *OrderHandler) Ready(w http.ResponseWriter, r *http.Request) {
+	sellerID := middleware.UserIDFromCtx(r.Context())
+	o, err := h.svc.MarkReady(r.Context(), chi.URLParam(r, "id"), sellerID)
+	switch {
+	case errors.Is(err, order.ErrNotFound):
+		response.Error(w, http.StatusNotFound, "order not found")
+	case errors.Is(err, order.ErrUnauthorized):
+		response.Error(w, http.StatusForbidden, err.Error())
+	case errors.Is(err, order.ErrInvalidStatus):
+		response.Error(w, http.StatusConflict, err.Error())
+	case err != nil:
+		response.Error(w, http.StatusInternalServerError, err.Error())
+	default:
+		response.JSON(w, http.StatusOK, o)
+	}
+}
+
 // POST /api/v1/orders/scan  — vendedor escanea el QR
 func (h *OrderHandler) ScanQR(w http.ResponseWriter, r *http.Request) {
 	var body struct {

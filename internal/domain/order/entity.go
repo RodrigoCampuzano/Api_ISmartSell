@@ -30,28 +30,28 @@ var (
 )
 
 type Item struct {
-	ID        string  `db:"id"`
-	OrderID   string  `db:"order_id"`
-	ProductID string  `db:"product_id"`
-	Quantity  int     `db:"quantity"`
-	UnitPrice float64 `db:"unit_price"`
+	ID        string  `db:"id" json:"id"`
+	OrderID   string  `db:"order_id" json:"order_id"`
+	ProductID string  `db:"product_id" json:"product_id"`
+	Quantity  int     `db:"quantity" json:"quantity"`
+	UnitPrice float64 `db:"unit_price" json:"unit_price"`
 }
 
 func (i *Item) Subtotal() float64 { return i.UnitPrice * float64(i.Quantity) }
 
 type Order struct {
-	ID              string     `db:"id"`
-	BuyerID         string     `db:"buyer_id"`
-	BusinessID      string     `db:"business_id"`
-	Type            Type       `db:"type"`
-	Status          Status     `db:"status"`
-	Total           float64    `db:"total"`
-	QRCode          string     `db:"qr_code"`
-	DeliveryPointID *string    `db:"delivery_point_id"`
-	PickupDeadline  *time.Time `db:"pickup_deadline"`
-	CreatedAt       time.Time  `db:"created_at"`
-	UpdatedAt       time.Time  `db:"updated_at"`
-	Items           []Item     `db:"-"`
+	ID              string     `db:"id" json:"id"`
+	BuyerID         string     `db:"buyer_id" json:"buyer_id"`
+	BusinessID      string     `db:"business_id" json:"business_id"`
+	Type            Type       `db:"type" json:"type"`
+	Status          Status     `db:"status" json:"status"`
+	Total           float64    `db:"total" json:"total"`
+	QRCode          string     `db:"qr_code" json:"qr_code"`
+	DeliveryPointID *string    `db:"delivery_point_id" json:"delivery_point_id,omitempty"`
+	PickupDeadline  *time.Time `db:"pickup_deadline" json:"pickup_deadline,omitempty"`
+	CreatedAt       time.Time  `db:"created_at" json:"created_at"`
+	UpdatedAt       time.Time  `db:"updated_at" json:"updated_at"`
+	Items           []Item     `db:"-" json:"items"`
 }
 
 func New(id, buyerID, businessID string, orderType Type, items []Item, dpID *string, deadline *time.Time) *Order {
