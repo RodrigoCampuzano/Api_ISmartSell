@@ -49,6 +49,7 @@ func NewRouter(h Handlers, jwtSvc *jwt.Service) http.Handler {
 			r.Group(func(r chi.Router) {
 				r.Use(middleware.RequireRole("seller"))
 				r.Post("/businesses", h.Business.Create)
+				r.Delete("/businesses/{id}", h.Business.Delete)
 				r.Get("/businesses/mine", h.Business.ListMine)
 				r.Post("/businesses/{id}/delivery-points", h.Business.AddDeliveryPoint)
 

@@ -125,3 +125,24 @@ func (h *BusinessHandler) AddDeliveryPoint(w http.ResponseWriter, r *http.Reques
 	}
 	response.JSON(w, http.StatusCreated, dp)
 }
+
+// DELETE /api/v1/businesses/:id
+func (h *BusinessHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	ownerID := middleware.UserIDFromCtx(r.Context())
+
+	err := h.svc.Delete(r.Context(), id, ownerID)
+	if errors.Is(err, business.ErrNotFound) {
+		response.Error(w, http.StatusNotFound, "business not found")
+		return
+	}
+	if errors.Is(err, business.ErrUnauthorized) {
+		response.Error(w, http.StatusForbidden, err.Error())
+		return
+	}
+	if err != nil {
+		response.Error(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}

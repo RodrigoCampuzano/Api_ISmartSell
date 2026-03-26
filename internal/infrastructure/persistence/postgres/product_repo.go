@@ -34,7 +34,7 @@ func (r *productRepository) Update(ctx context.Context, p *product.Product) erro
 }
 
 func (r *productRepository) Delete(ctx context.Context, id string) error {
-	_, err := r.db.ExecContext(ctx, `UPDATE products SET active = FALSE WHERE id = $1`, id)
+	_, err := r.db.ExecContext(ctx, `DELETE FROM products WHERE id = $1`, id)
 	return err
 }
 

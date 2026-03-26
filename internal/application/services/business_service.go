@@ -42,6 +42,7 @@ type BusinessService interface {
 	GetByOwner(ctx context.Context, ownerID string) ([]*business.Business, error)
 	GetNearby(ctx context.Context, in NearbyInput) ([]*business.Business, error)
 	AddDeliveryPoint(ctx context.Context, in CreateDeliveryPointInput) (*business.DeliveryPoint, error)
+	Delete(ctx context.Context, id, ownerID string) error
 }
 
 // ----- Implementación -----
@@ -111,4 +112,18 @@ func (s *businessService) AddDeliveryPoint(ctx context.Context, in CreateDeliver
 		return nil, fmt.Errorf("businessService.AddDeliveryPoint: %w", err)
 	}
 	return dp, nil
+}
+
+func (s *businessService) Delete(ctx context.Context, id, ownerID string) error {
+	b, err := s.repo.FindByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	if !b.OwnedBy(ownerID) {
+		return business.ErrUnauthorized
+	}
+	if err := s.repo.Delete(ctx, id); err != nil {
+		return fmt.Errorf("businessService.Delete: %w", err)
+	}
+	return nil
 }

@@ -323,6 +323,16 @@ Agrega un punto de entrega a un negocio propio.
 
 ---
 
+#### `DELETE /api/v1/businesses/{id}` 🔒 seller
+
+Eliminación total en cascada de un negocio propio.
+
+**Response:** `204 No Content`
+
+**Errores:** `403` si no es dueño.
+
+---
+
 ### 📦 Productos
 
 ---
@@ -405,7 +415,7 @@ Actualiza un producto propio.
 
 #### `DELETE /api/v1/products/{id}` 🔒 seller
 
-Soft-delete de un producto (marca `active = false`).
+Eliminación total de un producto.
 
 **Response:** `204 No Content`
 

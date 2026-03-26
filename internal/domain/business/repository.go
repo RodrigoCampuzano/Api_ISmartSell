@@ -5,6 +5,7 @@ import "context"
 type Repository interface {
 	Save(ctx context.Context, b *Business) error
 	Update(ctx context.Context, b *Business) error
+	Delete(ctx context.Context, id string) error
 	FindByID(ctx context.Context, id string) (*Business, error)
 	FindByOwner(ctx context.Context, ownerID string) ([]*Business, error)
 	// FindNearby devuelve negocios dentro de radiusKm kilómetros.

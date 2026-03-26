@@ -100,3 +100,8 @@ func (r *businessRepository) FindDeliveryPoints(ctx context.Context, businessID 
 	err := r.db.SelectContext(ctx, &list, q, businessID)
 	return list, err
 }
+
+func (r *businessRepository) Delete(ctx context.Context, id string) error {
+	_, err := r.db.ExecContext(ctx, `DELETE FROM businesses WHERE id = $1`, id)
+	return err
+}
