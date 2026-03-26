@@ -122,7 +122,8 @@ func (s *businessService) Delete(ctx context.Context, id, ownerID string) error 
 	if !b.OwnedBy(ownerID) {
 		return business.ErrUnauthorized
 	}
-	if err := s.repo.Delete(ctx, id); err != nil {
+	b.Active = false
+	if err := s.repo.Update(ctx, b); err != nil {
 		return fmt.Errorf("businessService.Delete: %w", err)
 	}
 	return nil
