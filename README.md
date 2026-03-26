@@ -413,6 +413,23 @@ Actualiza un producto propio.
 
 ---
 
+#### `PATCH /api/v1/products/{id}/stock` 🔒 seller
+
+Actualiza únicamente el stock de un producto propio.
+
+**Request:**
+```json
+{
+  "stock": 150
+}
+```
+
+**Response (`200`):** Producto actualizado.
+
+**Errores:** `403` si no es dueño.
+
+---
+
 #### `DELETE /api/v1/products/{id}` 🔒 seller
 
 Soft-delete de un producto (marca `active = false`).

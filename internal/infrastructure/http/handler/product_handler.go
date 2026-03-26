@@ -130,3 +130,30 @@ func (h *ProductHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusNoContent)
 }
+
+// PATCH /api/v1/products/:id/stock
+func (h *ProductHandler) UpdateStock(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		Stock int `json:"stock"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		response.Error(w, http.StatusBadRequest, "invalid body")
+		return
+	}
+	ownerID := middleware.UserIDFromCtx(r.Context())
+	p, err := h.svc.UpdateStock(r.Context(), chi.URLParam(r, "id"), ownerID, body.Stock)
+	
+	if errors.Is(err, product.ErrNotFound) {
+		response.Error(w, http.StatusNotFound, "product not found")
+		return
+	}
+	if errors.Is(err, product.ErrUnauthorized) {
+		response.Error(w, http.StatusForbidden, err.Error())
+		return
+	}
+	if err != nil {
+		response.Error(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	response.JSON(w, http.StatusOK, p)
+}

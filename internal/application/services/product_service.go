@@ -37,6 +37,7 @@ type UpdateProductInput struct {
 type ProductService interface {
 	Create(ctx context.Context, in CreateProductInput) (*product.Product, error)
 	Update(ctx context.Context, in UpdateProductInput) (*product.Product, error)
+	UpdateStock(ctx context.Context, id, ownerID string, stock int) (*product.Product, error)
 	Delete(ctx context.Context, id, ownerID string) error
 	GetByID(ctx context.Context, id string) (*product.Product, error)
 	GetByBusiness(ctx context.Context, businessID string) ([]*product.Product, error)
@@ -91,6 +92,27 @@ func (s *productService) Update(ctx context.Context, in UpdateProductInput) (*pr
 
 	if err := s.productRepo.Update(ctx, p); err != nil {
 		return nil, fmt.Errorf("productService.Update: %w", err)
+	}
+	return p, nil
+}
+
+func (s *productService) UpdateStock(ctx context.Context, id, ownerID string, stock int) (*product.Product, error) {
+	p, err := s.productRepo.FindByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	b, err := s.businessRepo.FindByID(ctx, p.BusinessID)
+	if err != nil {
+		return nil, err
+	}
+	if !b.OwnedBy(ownerID) {
+		return nil, product.ErrUnauthorized
+	}
+
+	p.Stock = stock
+	if err := s.productRepo.Update(ctx, p); err != nil {
+		return nil, fmt.Errorf("productService.UpdateStock: %w", err)
 	}
 	return p, nil
 }

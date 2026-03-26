@@ -56,6 +56,7 @@ func NewRouter(h Handlers, jwtSvc *jwt.Service) http.Handler {
 				// Productos: crear/editar/borrar
 				r.Post("/businesses/{businessId}/products", h.Product.Create)
 				r.Put("/products/{id}", h.Product.Update)
+				r.Patch("/products/{id}/stock", h.Product.UpdateStock)
 				r.Delete("/products/{id}", h.Product.Delete)
 
 				// Órdenes del negocio
