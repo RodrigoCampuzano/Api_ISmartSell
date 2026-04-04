@@ -10,8 +10,8 @@ import (
 	"syscall"
 	"time"
 
-	_ "github.com/lib/pq"
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 
 	"github.com/RodrigoCampuzano/Api_ISmartSell/internal/application/services"
 	infraHTTP "github.com/RodrigoCampuzano/Api_ISmartSell/internal/infrastructure/http"
@@ -40,18 +40,18 @@ func main() {
 	qrSvc := qr.NewService()
 
 	// ── Repositorios (adaptadores de salida) ────────────────
-	userRepo     := postgres.NewUserRepository(db)
+	userRepo := postgres.NewUserRepository(db)
 	businessRepo := postgres.NewBusinessRepository(db)
-	productRepo  := postgres.NewProductRepository(db)
-	orderRepo    := postgres.NewOrderRepository(db)
-	fcmRepo      := postgres.NewFCMRepository(db)
+	productRepo := postgres.NewProductRepository(db)
+	orderRepo := postgres.NewOrderRepository(db)
+	fcmRepo := postgres.NewFCMRepository(db)
 
 	// ── Servicios de aplicación (casos de uso) ──────────────
-	userSvc     := services.NewUserService(userRepo, jwtSvc)
+	userSvc := services.NewUserService(userRepo, jwtSvc)
 	businessSvc := services.NewBusinessService(businessRepo)
-	productSvc  := services.NewProductService(productRepo, businessRepo)
+	productSvc := services.NewProductService(productRepo, businessRepo)
 
-	notifSvc, err := services.NewNotificationService(fcmRepo, "ismartshell-firebase-adminsdk-fbsvc-db9cfd3ead.json")
+	notifSvc, err := services.NewNotificationService(fcmRepo, "/var/www/Api_ISmartSell/ismartshell-firebase-adminsdk-fbsvc-db9cfd3ead.json")
 	if err != nil {
 		log.Fatalf("notification service init: %v", err)
 	}
