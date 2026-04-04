@@ -40,6 +40,7 @@ func NewRouter(h Handlers, jwtSvc *jwt.Service) http.Handler {
 
 			// Perfil propio
 			r.Get("/users/me", h.User.Me)
+			r.Post("/users/fcm-token", h.User.SaveFCMToken)
 
 			// Negocios (públicos con auth)
 			r.Get("/businesses", h.Business.ListNearby)

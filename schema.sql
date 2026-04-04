@@ -126,3 +126,13 @@ CREATE TABLE payments (
     updated_at TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_payment_order FOREIGN KEY (order_id) REFERENCES orders(id)
 );
+
+-- ------------------------------------------------------------
+-- fcm_tokens
+-- ------------------------------------------------------------
+CREATE TABLE fcm_tokens (
+    user_id CHAR(36) NOT NULL PRIMARY KEY,
+    token VARCHAR(500) NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_fcm_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);

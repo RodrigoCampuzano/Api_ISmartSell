@@ -44,16 +44,23 @@ func main() {
 	businessRepo := postgres.NewBusinessRepository(db)
 	productRepo  := postgres.NewProductRepository(db)
 	orderRepo    := postgres.NewOrderRepository(db)
+	fcmRepo      := postgres.NewFCMRepository(db)
 
 	// ── Servicios de aplicación (casos de uso) ──────────────
 	userSvc     := services.NewUserService(userRepo, jwtSvc)
 	businessSvc := services.NewBusinessService(businessRepo)
 	productSvc  := services.NewProductService(productRepo, businessRepo)
-	orderSvc    := services.NewOrderService(orderRepo, productRepo, businessRepo, qrSvc)
+
+	notifSvc, err := services.NewNotificationService(fcmRepo, "ismartshell-firebase-adminsdk-fbsvc-db9cfd3ead.json")
+	if err != nil {
+		log.Fatalf("notification service init: %v", err)
+	}
+
+	orderSvc := services.NewOrderService(orderRepo, productRepo, businessRepo, notifSvc, qrSvc)
 
 	// ── Handlers HTTP (adaptadores de entrada) ──────────────
 	h := infraHTTP.Handlers{
-		User:     handler.NewUserHandler(userSvc),
+		User:     handler.NewUserHandler(userSvc, notifSvc),
 		Business: handler.NewBusinessHandler(businessSvc),
 		Product:  handler.NewProductHandler(productSvc),
 		Order:    handler.NewOrderHandler(orderSvc),

@@ -12,11 +12,12 @@ import (
 )
 
 type UserHandler struct {
-	svc services.UserService
+	svc      services.UserService
+	notifSvc services.NotificationService
 }
 
-func NewUserHandler(svc services.UserService) *UserHandler {
-	return &UserHandler{svc: svc}
+func NewUserHandler(svc services.UserService, notifSvc services.NotificationService) *UserHandler {
+	return &UserHandler{svc: svc, notifSvc: notifSvc}
 }
 
 // POST /api/v1/auth/register
@@ -92,4 +93,29 @@ func (h *UserHandler) Me(w http.ResponseWriter, r *http.Request) {
 	}
 	u.Password = "" // nunca exponer el hash
 	response.JSON(w, http.StatusOK, u)
+}
+
+// POST /api/v1/users/fcm-token
+func (h *UserHandler) SaveFCMToken(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		Token string `json:"token"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		response.Error(w, http.StatusBadRequest, "invalid body")
+		return
+	}
+	if body.Token == "" {
+		response.Error(w, http.StatusBadRequest, "token is required")
+		return
+	}
+
+	uid := middleware.UserIDFromCtx(r.Context())
+	
+	err := h.notifSvc.SaveFCMToken(r.Context(), uid, body.Token)
+	if err != nil {
+		response.Error(w, http.StatusInternalServerError, "could not save token")
+		return
+	}
+
+	response.JSON(w, http.StatusOK, map[string]string{"message": "token saved successfully"})
 }

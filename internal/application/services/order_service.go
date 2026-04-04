@@ -48,6 +48,7 @@ type orderService struct {
 	orderRepo    order.Repository
 	productRepo  product.Repository
 	businessRepo business.Repository
+	notifSvc     NotificationService
 	qrSvc        *qr.Service
 }
 
@@ -55,19 +56,21 @@ func NewOrderService(
 	or order.Repository,
 	pr product.Repository,
 	br business.Repository,
+	ns NotificationService,
 	qrSvc *qr.Service,
 ) OrderService {
 	return &orderService{
 		orderRepo:    or,
 		productRepo:  pr,
 		businessRepo: br,
+		notifSvc:     ns,
 		qrSvc:        qrSvc,
 	}
 }
 
 func (s *orderService) CreateOrder(ctx context.Context, in CreateOrderInput) (*order.Order, error) {
 	// Validar que el negocio existe
-	_, err := s.businessRepo.FindByID(ctx, in.BusinessID)
+	b, err := s.businessRepo.FindByID(ctx, in.BusinessID)
 	if err != nil {
 		return nil, err
 	}
@@ -127,6 +130,10 @@ func (s *orderService) CreateOrder(ctx context.Context, in CreateOrderInput) (*o
 	}
 
 	o.Items = items
+
+	// Trigger push notification to the seller
+	s.notifSvc.SendPushNotification(b.OwnerID, "Nuevo pedido", "Tienes un pedido nuevo en tu tienda")
+
 	return o, nil
 }
 
@@ -179,6 +186,10 @@ func (s *orderService) MarkReady(ctx context.Context, id, sellerID string) (*ord
 	if err := s.orderRepo.Update(ctx, o); err != nil {
 		return nil, fmt.Errorf("orderService.MarkReady update: %w", err)
 	}
+
+	// Trigger push notification to the buyer
+	s.notifSvc.SendPushNotification(o.BuyerID, "¡Tu pedido está listo!", "Pasa a recoger tu pedido")
+
 	return o, nil
 }
 
