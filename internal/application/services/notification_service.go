@@ -27,7 +27,7 @@ type notificationService struct {
 
 func NewNotificationService(repo FCMRepository, credsFilePath string) (NotificationService, error) {
 	opt := option.WithCredentialsFile(credsFilePath)
-	app, err := firebase.NewApp(context.Background(), nil, opt)
+	app, err := firebase.NewApp(context.Background(), &firebase.Config{ProjectID: "ismartshell"}, opt)
 	if err != nil {
 		return nil, fmt.Errorf("error initializing firebase app: %w", err)
 	}
