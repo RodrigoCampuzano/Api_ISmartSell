@@ -16,6 +16,7 @@ type Handlers struct {
 	Business *handler.BusinessHandler
 	Product  *handler.ProductHandler
 	Order    *handler.OrderHandler
+	Payment  *handler.PaymentHandler
 }
 
 func NewRouter(h Handlers, jwtSvc *jwt.Service) http.Handler {
@@ -32,6 +33,12 @@ func NewRouter(h Handlers, jwtSvc *jwt.Service) http.Handler {
 		r.Route("/auth", func(r chi.Router) {
 			r.Post("/register", h.User.Register)
 			r.Post("/login", h.User.Login)
+		})
+
+		// ── Mercado Pago (Público) ──────────────────────────
+		r.Route("/payments", func(r chi.Router) {
+			r.Get("/oauth/callback", h.Payment.OAuthCallback)
+			r.Post("/webhook", h.Payment.Webhook)
 		})
 
 		// ── Rutas protegidas ────────────────────────────────
@@ -64,6 +71,9 @@ func NewRouter(h Handlers, jwtSvc *jwt.Service) http.Handler {
 				r.Get("/businesses/{businessId}/orders", h.Order.ListByBusiness)
 				r.Post("/orders/{id}/ready", h.Order.Ready)
 				r.Post("/orders/scan", h.Order.ScanQR)
+
+				// Mercado Pago
+				r.Get("/payments/authorize-seller", h.Payment.AuthorizeSeller)
 			})
 
 			// Productos — lectura pública (autenticado)

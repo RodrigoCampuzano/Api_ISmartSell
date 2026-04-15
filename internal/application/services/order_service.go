@@ -50,6 +50,7 @@ type orderService struct {
 	businessRepo business.Repository
 	notifSvc     NotificationService
 	qrSvc        *qr.Service
+	paymentSvc   PaymentService
 }
 
 func NewOrderService(
@@ -58,6 +59,7 @@ func NewOrderService(
 	br business.Repository,
 	ns NotificationService,
 	qrSvc *qr.Service,
+	ps PaymentService,
 ) OrderService {
 	return &orderService{
 		orderRepo:    or,
@@ -65,6 +67,7 @@ func NewOrderService(
 		businessRepo: br,
 		notifSvc:     ns,
 		qrSvc:        qrSvc,
+		paymentSvc:   ps,
 	}
 }
 
@@ -130,6 +133,12 @@ func (s *orderService) CreateOrder(ctx context.Context, in CreateOrderInput) (*o
 	}
 
 	o.Items = items
+
+	// Create Mercado Pago Preference
+	pref, err := s.paymentSvc.CreatePreference(ctx, o, b.OwnerID)
+	if err == nil && pref != nil {
+		o.InitPoint = pref.InitPoint
+	}
 
 	// Trigger push notification to the seller
 	s.notifSvc.SendPushNotification(b.OwnerID, "Nuevo pedido", "Tienes un pedido nuevo en tu tienda")
@@ -219,6 +228,10 @@ func (s *orderService) ScanQR(ctx context.Context, qrCode, sellerID string) (*or
 	if err := s.orderRepo.Update(ctx, o); err != nil {
 		return nil, fmt.Errorf("orderService.ScanQR update: %w", err)
 	}
+
+	// Capture the authorized payment in Mercado Pago
+	_ = s.paymentSvc.CapturePayment(ctx, o.ID)
+
 	return o, nil
 }
 
@@ -236,5 +249,9 @@ func (s *orderService) CancelOrder(ctx context.Context, id, userID string) (*ord
 	if err := s.orderRepo.Update(ctx, o); err != nil {
 		return nil, err
 	}
+
+	// Refund the payment in MP
+	_ = s.paymentSvc.CancelPayment(ctx, o.ID)
+
 	return o, nil
 }

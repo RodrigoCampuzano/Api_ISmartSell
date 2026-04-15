@@ -9,17 +9,18 @@ type Status string
 type Type string
 
 const (
-	StatusPending   Status = "pending"
-	StatusPaid      Status = "paid"
-	StatusReserved  Status = "reserved"
-	StatusReady     Status = "ready"
-	StatusDelivered Status = "delivered"
-	StatusCancelled Status = "cancelled"
+	StatusPending    Status = "pending"
+	StatusPaid       Status = "paid"
+	StatusReserved   Status = "reserved"
+	StatusReady      Status = "ready"
+	StatusDelivered  Status = "delivered"
+	StatusCancelled  Status = "cancelled"
+	StatusAuthorized Status = "authorized"
 
 	TypeOnline   Type = "online"
 	TypeReserved Type = "reserved"
 
-	CommissionRate = 0.01 // 1%
+	CommissionRate = 0.05 // 5%
 )
 
 var (
@@ -52,6 +53,7 @@ type Order struct {
 	CreatedAt       time.Time  `db:"created_at" json:"created_at"`
 	UpdatedAt       time.Time  `db:"updated_at" json:"updated_at"`
 	Items           []Item     `db:"-" json:"items"`
+	InitPoint       string     `db:"-" json:"init_point,omitempty"`
 }
 
 func New(id, buyerID, businessID string, orderType Type, items []Item, dpID *string, deadline *time.Time) *Order {

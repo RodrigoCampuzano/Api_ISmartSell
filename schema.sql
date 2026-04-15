@@ -112,18 +112,19 @@ CREATE TABLE order_items (
 CREATE INDEX idx_order_items_order ON order_items(order_id);
 
 -- ------------------------------------------------------------
--- payments  (comisión 1% por venta)
+-- payments  (comisión 5% por venta)
 -- ------------------------------------------------------------
 CREATE TABLE payments (
-    id         CHAR(36)      NOT NULL PRIMARY KEY,
-    order_id   CHAR(36)      NOT NULL UNIQUE,
-    amount     DECIMAL(10,2) NOT NULL,
-    commission DECIMAL(10,2) NOT NULL, -- 1% del monto
-    method     VARCHAR(10)   NOT NULL DEFAULT 'online' CHECK (method IN ('online','cash')),
-    status     VARCHAR(10)   NOT NULL DEFAULT 'pending'
-               CHECK (status IN ('pending','completed','failed','refunded')),
-    created_at TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
+    id            CHAR(36)      NOT NULL PRIMARY KEY,
+    order_id      CHAR(36)      NOT NULL UNIQUE,
+    amount        DECIMAL(10,2) NOT NULL,
+    commission    DECIMAL(10,2) NOT NULL, -- 5% del monto
+    method        VARCHAR(10)   NOT NULL DEFAULT 'online' CHECK (method IN ('online','cash')),
+    status        VARCHAR(12)   NOT NULL DEFAULT 'pending'
+                  CHECK (status IN ('pending','authorized','completed','failed','refunded','cancelled')),
+    mp_payment_id TEXT,
+    created_at    TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
+    updated_at    TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_payment_order FOREIGN KEY (order_id) REFERENCES orders(id)
 );
 
@@ -135,4 +136,18 @@ CREATE TABLE fcm_tokens (
     token VARCHAR(500) NOT NULL,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_fcm_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- ------------------------------------------------------------
+-- seller_mp_credentials
+-- ------------------------------------------------------------
+CREATE TABLE seller_mp_credentials (
+    user_id       CHAR(36)    NOT NULL PRIMARY KEY,
+    access_token  TEXT        NOT NULL,
+    refresh_token TEXT        NOT NULL,
+    mp_user_id    TEXT        NOT NULL,
+    expires_at    TIMESTAMPTZ NOT NULL,
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_mp_cred_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );

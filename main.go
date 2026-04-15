@@ -45,6 +45,8 @@ func main() {
 	productRepo := postgres.NewProductRepository(db)
 	orderRepo := postgres.NewOrderRepository(db)
 	fcmRepo := postgres.NewFCMRepository(db)
+	paymentRepo := postgres.NewPaymentRepository(db)
+	sellerCredRepo := postgres.NewSellerCredentialRepository(db)
 
 	// ── Servicios de aplicación (casos de uso) ──────────────
 	userSvc := services.NewUserService(userRepo, jwtSvc)
@@ -56,7 +58,8 @@ func main() {
 		log.Fatalf("notification service init: %v", err)
 	}
 
-	orderSvc := services.NewOrderService(orderRepo, productRepo, businessRepo, notifSvc, qrSvc)
+	paymentSvc := services.NewPaymentService(cfg, paymentRepo, sellerCredRepo)
+	orderSvc := services.NewOrderService(orderRepo, productRepo, businessRepo, notifSvc, qrSvc, paymentSvc)
 
 	// ── Handlers HTTP (adaptadores de entrada) ──────────────
 	h := infraHTTP.Handlers{
@@ -64,6 +67,7 @@ func main() {
 		Business: handler.NewBusinessHandler(businessSvc),
 		Product:  handler.NewProductHandler(productSvc),
 		Order:    handler.NewOrderHandler(orderSvc),
+		Payment:  handler.NewPaymentHandler(paymentSvc),
 	}
 
 	// ── Job: cancelar pedidos expirados cada 5 min ──────────
