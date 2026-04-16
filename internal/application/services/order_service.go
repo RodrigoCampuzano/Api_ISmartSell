@@ -219,6 +219,8 @@ func (s *orderService) ScanQR(ctx context.Context, qrCode, sellerID string) (*or
 	if o.IsExpired() {
 		_ = o.Cancel()
 		_ = s.orderRepo.Update(ctx, o)
+		// Reembolso parcial al comprador (sin comisión)
+		_ = s.paymentSvc.CancelPayment(ctx, o.ID)
 		return nil, order.ErrExpired
 	}
 

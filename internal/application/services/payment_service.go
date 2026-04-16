@@ -225,8 +225,16 @@ func (s *paymentService) CancelPayment(ctx context.Context, orderID string) erro
 		return fmt.Errorf("refunds are handled separately, only cancel pre-auths right now")
 	}
 
+	// Reembolso parcial: devolver solo el costo de productos (sin comisión)
+	// La comisión del 5% queda para la plataforma
+	refundAmount := p.Amount - p.Commission
+	refundPayload := map[string]interface{}{
+		"amount": refundAmount,
+	}
+	rb, _ := json.Marshal(refundPayload)
+
 	url := fmt.Sprintf("https://api.mercadopago.com/v1/payments/%s/refunds", p.MPPaymentID)
-	req, err := http.NewRequestWithContext(ctx, "POST", url, nil)
+	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(rb))
 	if err != nil {
 		return err
 	}
@@ -240,7 +248,7 @@ func (s *paymentService) CancelPayment(ctx context.Context, orderID string) erro
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("refund failed")
+		return fmt.Errorf("partial refund failed: %d", resp.StatusCode)
 	}
 
 	p.Status = payment.StatusRefunded

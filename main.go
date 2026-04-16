@@ -75,13 +75,18 @@ func main() {
 		ticker := time.NewTicker(5 * time.Minute)
 		defer ticker.Stop()
 		for range ticker.C {
-			n, err := orderRepo.(interface {
-				CancelExpired(context.Context) (int64, error)
+			ids, err := orderRepo.(interface {
+				CancelExpired(context.Context) ([]string, error)
 			}).CancelExpired(context.Background())
 			if err != nil {
 				log.Printf("cancelExpired: %v", err)
-			} else if n > 0 {
-				log.Printf("cancelExpired: %d orders cancelled", n)
+			} else if len(ids) > 0 {
+				log.Printf("cancelExpired: %d orders cancelled, processing refunds...", len(ids))
+				for _, id := range ids {
+					if err := paymentSvc.CancelPayment(context.Background(), id); err != nil {
+						log.Printf("cancelExpired refund orderID=%s: %v", id, err)
+					}
+				}
 			}
 		}
 	}()

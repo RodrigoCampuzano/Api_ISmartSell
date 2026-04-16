@@ -10,6 +10,7 @@ type Repository interface {
 	FindByBusiness(ctx context.Context, businessID string) ([]*Order, error)
 	FindByQRCode(ctx context.Context, qrCode string) (*Order, error)
 	// CancelExpired cancela pedidos tipo 'reserved' que pasaron su deadline.
-	CancelExpired(ctx context.Context) (int64, error)
+	// Retorna los IDs de las órdenes canceladas para procesar reembolsos.
+	CancelExpired(ctx context.Context) ([]string, error)
 	SaveItems(ctx context.Context, items []Item) error
 }

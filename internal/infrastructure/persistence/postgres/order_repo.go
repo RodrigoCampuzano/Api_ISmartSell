@@ -87,16 +87,32 @@ func (r *orderRepository) FindByQRCode(ctx context.Context, qrCode string) (*ord
 	return &o, nil
 }
 
-func (r *orderRepository) CancelExpired(ctx context.Context) (int64, error) {
-	res, err := r.db.ExecContext(ctx, `
+func (r *orderRepository) CancelExpired(ctx context.Context) ([]string, error) {
+	// Primero obtenemos los IDs de las órdenes que vamos a cancelar
+	var ids []string
+	err := r.db.SelectContext(ctx, &ids, `
+		SELECT id FROM orders
+		WHERE type = 'reserved'
+		  AND status IN ('reserved','ready')
+		  AND pickup_deadline < NOW()`)
+	if err != nil {
+		return nil, fmt.Errorf("orderRepo.CancelExpired select: %w", err)
+	}
+
+	if len(ids) == 0 {
+		return nil, nil
+	}
+
+	// Ahora cancelamos todas
+	_, err = r.db.ExecContext(ctx, `
 		UPDATE orders
 		SET status = 'cancelled', updated_at = NOW()
 		WHERE type = 'reserved'
 		  AND status IN ('reserved','ready')
 		  AND pickup_deadline < NOW()`)
 	if err != nil {
-		return 0, fmt.Errorf("orderRepo.CancelExpired: %w", err)
+		return nil, fmt.Errorf("orderRepo.CancelExpired update: %w", err)
 	}
-	n, _ := res.RowsAffected()
-	return n, nil
+
+	return ids, nil
 }
