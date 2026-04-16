@@ -29,6 +29,10 @@ fail()  { echo -e "${RED}[✗]${NC} $1"; exit 1; }
 # ── 1. Pull del código ───────────────────────────────────────
 info "Actualizando código desde GitHub..."
 cd "$APP_DIR" || fail "No existe el directorio $APP_DIR"
+
+# Permitir a Git ejecutarse como root en un directorio no propio
+git config --global --add safe.directory "$APP_DIR"
+
 git fetch origin
 git reset --hard "origin/$GIT_BRANCH"
 info "Código actualizado a la última versión de '$GIT_BRANCH'."
@@ -48,6 +52,9 @@ info "Compilando la API..."
 cd "$APP_DIR"
 go build -o "$BINARY_NAME" ./main.go || fail "Error de compilación"
 info "Binario '$BINARY_NAME' compilado exitosamente."
+
+# Restaurar permisos al usuario 'ubuntu' para evitar problemas con git pull futuros
+chown -R ubuntu:ubuntu "$APP_DIR"
 
 # ── 4. Reiniciar el servicio ──────────────────────────────────
 info "Reiniciando servicio $SERVICE_NAME..."
