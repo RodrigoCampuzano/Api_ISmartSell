@@ -8,6 +8,10 @@
 
 set -euo pipefail
 
+# Agregar las rutas clásicas donde se instala Go al PATH (ya que al usar sudo desaparecen)
+export PATH=$PATH:/usr/local/go/bin:/home/ubuntu/go/bin
+
+
 # ── Configuración ─────────────────────────────────────────────
 APP_DIR="/var/www/Api_ISmartSell"
 SERVICE_NAME="pos-api"
