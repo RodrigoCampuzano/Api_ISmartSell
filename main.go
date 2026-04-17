@@ -58,7 +58,7 @@ func main() {
 		log.Fatalf("notification service init: %v", err)
 	}
 
-	paymentSvc := services.NewPaymentService(cfg, paymentRepo, sellerCredRepo)
+	paymentSvc := services.NewPaymentService(cfg, paymentRepo, sellerCredRepo, orderRepo)
 	orderSvc := services.NewOrderService(orderRepo, productRepo, businessRepo, notifSvc, qrSvc, paymentSvc)
 
 	// ── Handlers HTTP (adaptadores de entrada) ──────────────
