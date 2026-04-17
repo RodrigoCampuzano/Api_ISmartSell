@@ -139,6 +139,7 @@ func (s *orderService) CreateOrder(ctx context.Context, in CreateOrderInput) (*o
 	pref, err := s.paymentSvc.CreatePreference(ctx, o, b.OwnerID)
 	if err == nil && pref != nil {
 		o.InitPoint = pref.InitPoint
+		log.Printf("✅ ÉXITO MERCADO PAGO: Se generó el link: %s", o.InitPoint)
 	} else if err != nil {
 		log.Printf("⚠️ SILENT ERROR: CreatePreference failed for Order %s: %v", o.ID, err)
 	}
