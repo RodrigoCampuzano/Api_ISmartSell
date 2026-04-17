@@ -16,6 +16,7 @@ type Config struct {
 	MPClientSecret  string
 	MPWebhookSecret string
 	MPRedirectURI   string
+	MPWebhookURL    string
 }
 
 func Load() Config {
@@ -29,6 +30,7 @@ func Load() Config {
 		MPClientSecret:  getEnv("MP_CLIENT_SECRET", ""),
 		MPWebhookSecret: getEnv("MP_WEBHOOK_SECRET", ""),
 		MPRedirectURI:   getEnv("MP_REDIRECT_URI", "http://localhost:8080/api/v1/payments/oauth/callback"),
+		MPWebhookURL:    getEnv("MP_WEBHOOK_URL", "https://apismart.serviciocdn.icu/api/v1/payments/webhook"),
 	}
 }
 

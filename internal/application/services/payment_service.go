@@ -137,6 +137,7 @@ func (s *paymentService) CreatePreference(ctx context.Context, o *order.Order, s
 		"items":              mpItems,
 		"marketplace_fee":    o.Commission(),
 		"external_reference": o.ID,
+		"notification_url":   s.cfg.MPWebhookURL,
 		"payment_methods": map[string]interface{}{
 			"excluded_payment_types": []map[string]string{
 				{"id": "ticket"},       // OXXO, 7-Eleven, etc.
