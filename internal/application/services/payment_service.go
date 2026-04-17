@@ -36,14 +36,16 @@ type paymentService struct {
 	cfg            config.Config
 	paymentRepo    payment.PaymentRepository
 	sellerCredRepo payment.SellerCredentialRepository
+	orderRepo      order.Repository
 	httpClient     *http.Client
 }
 
-func NewPaymentService(cfg config.Config, pr payment.PaymentRepository, scr payment.SellerCredentialRepository) PaymentService {
+func NewPaymentService(cfg config.Config, pr payment.PaymentRepository, scr payment.SellerCredentialRepository, or order.Repository) PaymentService {
 	return &paymentService{
 		cfg:            cfg,
 		paymentRepo:    pr,
 		sellerCredRepo: scr,
+		orderRepo:      or,
 		httpClient:     &http.Client{Timeout: 10 * time.Second},
 	}
 }
@@ -301,6 +303,19 @@ func (s *paymentService) HandleWebhook(ctx context.Context, body []byte) error {
 				p, err := s.paymentRepo.FindByOrderID(ctx, paymentResp.ExternalReference)
 				if err == nil && p != nil {
 					p.MPPaymentID = fmt.Sprintf("%d", paymentResp.ID)
+					
+					if paymentResp.Status == "approved" {
+						o, err := s.orderRepo.FindByID(ctx, p.OrderID)
+						if err == nil && o.Status == order.StatusPending {
+							if o.Type == order.TypeReserved {
+								o.Status = order.StatusReserved
+							} else {
+								o.Status = order.StatusPaid
+							}
+							_ = s.orderRepo.Update(ctx, o)
+						}
+					}
+
 					_ = s.paymentRepo.Update(ctx, p)
 				}
 			}

@@ -65,9 +65,6 @@ func New(id, buyerID, businessID string, orderType Type, items []Item, dpID *str
 	}
 
 	status := StatusPending
-	if orderType == TypeReserved {
-		status = StatusReserved
-	}
 
 	return &Order{
 		ID:              id,
