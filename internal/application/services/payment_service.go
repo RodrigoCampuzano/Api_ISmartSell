@@ -46,7 +46,7 @@ func NewPaymentService(cfg config.Config, pr payment.PaymentRepository, scr paym
 }
 
 func (s *paymentService) GetAuthorizationURL(sellerID string) string {
-	return fmt.Sprintf("https://auth.mercadopago.com/authorization?client_id=%s&response_type=code&platform_id=mp&state=id=%s&redirect_uri=%s", s.cfg.MPClientID, sellerID, s.cfg.MPRedirectURI)
+	return fmt.Sprintf("https://auth.mercadopago.com.mx/authorization?client_id=%s&response_type=code&platform_id=mp&state=id=%s&redirect_uri=%s", s.cfg.MPClientID, sellerID, s.cfg.MPRedirectURI)
 }
 
 func (s *paymentService) HandleOAuthCallback(ctx context.Context, code, sellerID string) error {
