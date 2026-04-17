@@ -134,6 +134,13 @@ func (s *paymentService) CreatePreference(ctx context.Context, o *order.Order, s
 		"marketplace_fee":    o.Commission(),
 		"capture":            capture,
 		"external_reference": o.ID,
+		"payment_methods": map[string]interface{}{
+			"excluded_payment_types": []map[string]string{
+				{"id": "ticket"},       // OXXO, 7-Eleven, etc.
+				{"id": "bank_transfer"},// SPEI
+				{"id": "atm"},          // Cajero automático
+			},
+		},
 	}
 
 	b, _ := json.Marshal(payload)
