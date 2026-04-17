@@ -132,7 +132,6 @@ func (s *paymentService) CreatePreference(ctx context.Context, o *order.Order, s
 	payload := map[string]interface{}{
 		"items":              mpItems,
 		"marketplace_fee":    o.Commission(),
-		"purpose":            "wallet_purchase",
 		"capture":            capture,
 		"external_reference": o.ID,
 	}
