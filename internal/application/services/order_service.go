@@ -118,10 +118,7 @@ func (s *orderService) CreateOrder(ctx context.Context, in CreateOrderInput) (*o
 		}
 	}
 
-	// Para compras en línea: el estatus arranca como pagado
-	if o.Type == order.TypeOnline {
-		_ = o.MarkPaid(o.QRCode)
-	}
+	// El estatus para online y reserved inicia en pendiente por defecto.
 
 	if err := s.orderRepo.Save(ctx, o); err != nil {
 		return nil, fmt.Errorf("orderService.CreateOrder save: %w", err)
