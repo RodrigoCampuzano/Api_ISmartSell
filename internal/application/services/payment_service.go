@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
 	"time"
 
@@ -121,11 +122,13 @@ func (s *paymentService) CreatePreference(ctx context.Context, o *order.Order, s
 
 	var mpItems []map[string]interface{}
 	for _, it := range o.Items {
+		// Sumar solo el 2% al precio unitario (el comprador absorbe 2%, el vendedor 3%)
+		priceWithFee := it.UnitPrice * (1 + order.BuyerFeeRate)
 		mpItems = append(mpItems, map[string]interface{}{
 			"id":         it.ProductID,
 			"title":      "Producto",
 			"quantity":   it.Quantity,
-			"unit_price": it.UnitPrice,
+			"unit_price": math.Round(priceWithFee*100) / 100, // redondear a 2 decimales
 		})
 	}
 

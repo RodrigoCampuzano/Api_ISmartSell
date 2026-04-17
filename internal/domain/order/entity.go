@@ -20,7 +20,9 @@ const (
 	TypeOnline   Type = "online"
 	TypeReserved Type = "reserved"
 
-	CommissionRate = 0.05 // 5%
+	CommissionRate    = 0.05 // 5% total para la plataforma
+	BuyerFeeRate      = 0.02 // 2% lo absorbe el comprador
+	SellerFeeRate     = 0.03 // 3% lo absorbe el vendedor
 )
 
 var (
