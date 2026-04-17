@@ -5,6 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"log"
 	"math"
 	"net/http"
 	"time"
@@ -158,6 +160,8 @@ func (s *paymentService) CreatePreference(ctx context.Context, o *order.Order, s
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= 400 {
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		log.Printf("MercadoPago CreatePreference Error (Code %d): %s", resp.StatusCode, string(bodyBytes))
 		return nil, fmt.Errorf("create preference failed: %d", resp.StatusCode)
 	}
 
