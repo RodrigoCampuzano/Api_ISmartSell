@@ -114,9 +114,7 @@ func (s *paymentService) CreatePreference(ctx context.Context, o *order.Order, s
 		Status:     payment.StatusPending,
 	}
 
-	capture := true
 	if o.Type == order.TypeReserved {
-		capture = false
 		p.Status = payment.StatusAuthorized
 	}
 
@@ -134,7 +132,6 @@ func (s *paymentService) CreatePreference(ctx context.Context, o *order.Order, s
 	payload := map[string]interface{}{
 		"items":              mpItems,
 		"marketplace_fee":    o.Commission(),
-		"capture":            capture,
 		"external_reference": o.ID,
 		"payment_methods": map[string]interface{}{
 			"excluded_payment_types": []map[string]string{
