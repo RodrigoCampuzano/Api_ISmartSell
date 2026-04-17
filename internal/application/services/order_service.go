@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -138,6 +139,8 @@ func (s *orderService) CreateOrder(ctx context.Context, in CreateOrderInput) (*o
 	pref, err := s.paymentSvc.CreatePreference(ctx, o, b.OwnerID)
 	if err == nil && pref != nil {
 		o.InitPoint = pref.InitPoint
+	} else if err != nil {
+		log.Printf("⚠️ SILENT ERROR: CreatePreference failed for Order %s: %v", o.ID, err)
 	}
 
 	// Trigger push notification to the seller
