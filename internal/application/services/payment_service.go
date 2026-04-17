@@ -234,9 +234,9 @@ func (s *paymentService) CancelPayment(ctx context.Context, orderID string) erro
 		return fmt.Errorf("refunds are handled separately, only cancel pre-auths right now")
 	}
 
-	// Reembolso parcial: devolver solo el costo de productos (sin comisión)
-	// La comisión del 5% queda para la plataforma
-	refundAmount := p.Amount - p.Commission
+	// Reembolso parcial: devolver solo el costo de los productos
+	// El 2% extra que pagó el comprador se queda como ganancia de la plataforma
+	refundAmount := p.Amount // p.Amount = precio productos sin el 2% de recargo
 	refundPayload := map[string]interface{}{
 		"amount": refundAmount,
 	}
